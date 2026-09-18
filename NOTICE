@@ -1,0 +1,43 @@
+Third-party components bundled by this project
+=============================================
+
+The APK ships prebuilt binaries under app/src/main/assets/rootkit/ so that a
+gradle build alone produces a working APK. Those binaries are NOT this project's
+code; they come from SimpleSSHD and its bundled libraries.
+
+1. SimpleSSHD  (GNU GPL v3)
+   Upstream: https://github.com/galexander/sshd   (version 27, package
+   org.galexander.sshd)
+   Files bundled here:
+     app/src/main/assets/rootkit/stage/lib/libsimplesshd-jni.so   (contains the
+       JNI wrapper and the SSH server it embeds — Dropbear)
+     app/src/main/assets/rootkit/stage/lib/libbuffersu.so
+     app/src/main/assets/rootkit/stage/lib/libscp.so
+     app/src/main/assets/rootkit/stage/lib/libsftp-server.so
+     app/src/main/assets/rootkit/stage/lib/librsync.so   (the rsync library
+       SimpleSSHD bundles; upstream librsync is LGPL-2.1 — verify against the
+       build you redistribute)
+
+   GPL note: if you redistribute an APK containing these binaries you must also
+   make the corresponding source available. For unmodified upstream builds the
+   upstream repository is that source. The launcher this project adds
+   (`stage/simplesshd_dropbear_launcher`, built from
+   `exploits/simplesshd_dropbear_launcher.c`) is shipped with its source in this
+   repository under the same terms, so the whole SSH payload stays
+   GPLv3-compatible.
+
+2. Dropbear SSH server  (MIT-style licence, upstream)
+   Upstream: https://matt.ucc.asn.au/dropbear/dropbear.html
+   Not shipped as a separate file: SimpleSSHD's build embeds it inside
+   libsimplesshd-jni.so, and the launcher calls its `dropbear_main`.
+
+3. Nothing else is bundled. The app itself has no third-party dependencies
+   beyond the Android platform (androidx is not used), and no analytics or
+   network writes: the report uploader ships with an empty ENDPOINT and refuses
+   to send anything until you set your own collector.
+
+Before publishing
+-----------------
+* Confirm the SimpleSSHD version you ship and, if you patch any of those
+  libraries, publish the patches. The copies bundled here are unmodified
+  upstream builds of version 27.

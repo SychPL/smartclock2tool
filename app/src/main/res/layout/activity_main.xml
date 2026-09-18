@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Two columns: buttons on the left, live log on the right. The panel is
+     800x480 landscape, so the buttons are kept tight (minHeight 0) and the log
+     takes the rest. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="6dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="4dp">
+
+        <TextView
+            android:id="@+id/appTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SMART CLOCK 2 TOOLS"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/appVersion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="9sp"
+            android:text="v?" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.42"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- One press: kernel write primitive -> usermode helper -> root
+                     channel, ADB over Wi-Fi on 5555 and (best effort) SSH 2223.
+                     Root and ADB do not depend on SSH; STATUS reports which of
+                     the three are up. -->
+                <Button
+                    android:id="@+id/btnRootSsh"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:minHeight="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:layout_marginBottom="3dp"
+                    android:text="ROOT + ADB"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="34dp"
+                    android:minHeight="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:layout_marginBottom="3dp"
+                    android:text="STATUS"
+                    android:textSize="11sp" />
+
+                <Button
+                    android:id="@+id/btnAdbWifi"
+                    android:layout_width="match_parent"
+                    android:layout_height="34dp"
+                    android:minHeight="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:layout_marginBottom="3dp"
+                    android:text="ADB WI-FI"
+                    android:textSize="11sp" />
+
+                <Button
+                    android:id="@+id/btnReport"
+                    android:layout_width="match_parent"
+                    android:layout_height="34dp"
+                    android:minHeight="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:layout_marginBottom="3dp"
+                    android:text="REPORT"
+                    android:textSize="11sp" />
+
+                <Button
+                    android:id="@+id/btnInstallApk"
+                    android:layout_width="match_parent"
+                    android:layout_height="34dp"
+                    android:minHeight="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:layout_marginBottom="3dp"
+                    android:text="UPDATE APK"
+                    android:textSize="11sp" />
+
+                <Button
+                    android:id="@+id/btnOpenDevSettings"
+                    android:layout_width="match_parent"
+                    android:layout_height="34dp"
+                    android:minHeight="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:layout_marginBottom="3dp"
+                    android:text="DEV SETTINGS"
+                    android:textSize="11sp" />
+
+                <Button
+                    android:id="@+id/btnClearLog"
+                    android:layout_width="match_parent"
+                    android:layout_height="34dp"
+                    android:minHeight="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:text="CLEAR LOG"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView
+            android:id="@+id/logScroll"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.58"
+            android:layout_marginStart="6dp"
+            android:background="#11000000">
+
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:textSize="9sp"
+                android:typeface="monospace"
+                android:textIsSelectable="true"
+                android:text="Ready. Press ROOT + ADB." />
+        </ScrollView>
+    </LinearLayout>
+</LinearLayout>

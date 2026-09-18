@@ -1,0 +1,2 @@
+# Replace this with YOUR ssh public key(s), one per line, then rebuild.
+# Until then the bundled dropbear accepts nothing (safe default).

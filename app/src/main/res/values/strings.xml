@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auto_tap_desc">Clicks the confirm button of the system install/update dialog when the service is armed remotely (agent: taparm). Otherwise the dialog has to be confirmed by hand.</string>
+</resources>

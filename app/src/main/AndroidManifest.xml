@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Everything this app does stays on your LAN. INTERNET is used for the
+         control agent (HTTP server on 8555, token printed in the log pane), for
+         APK self-update over HTTP from a server of your own, and to probe the
+         local address for an ADB TCP listener. No telemetry: the report
+         uploader ships with an empty ENDPOINT and refuses to send anything. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- No-cable self-update: APK downloads over plain HTTP from the LAN server. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Floating navigation overlay (Back/Home) for the buttonless clock. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <application
+        android:label="Lenovo Smart Clock 2 Tools"
+        android:allowBackup="false"
+        android:usesCleartextTraffic="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".InstallActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
+        <service
+            android:name=".AutoTapService"
+            android:exported="true"
+            android:label="Smart Clock 2 Tools AutoTap"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/auto_tap_config" />
+        </service>
+        <service
+            android:name=".AgentKeepAliveService"
+            android:exported="false"
+            android:stopWithTask="false" />
+        <service
+            android:name=".OverlayService"
+            android:exported="false" />
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

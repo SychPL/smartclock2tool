@@ -1,0 +1,49 @@
+# Gradle / Android Studio
+.gradle/
+**/build/
+local.properties
+.idea/
+*.iml
+
+# Python caches
+.pytest_cache/
+**/__pycache__/
+*.py[cod]
+
+# Generated binaries and local tool distributions
+/dist/
+/tools/jadx/
+/tools/jadx.zip
+/exploits/recon
+/exploits/recon_dyn
+/exploits/device_abi_probe
+/exploits/dri_inventory_probe
+/exploits/dri_open_probe
+/exploits/ion_ro_query_probe
+/exploits/probe2
+/exploits/probe5705
+/exploits/recon_ion
+/exploits/recon_ion_legacy
+/exploits/recon_pvrsync
+/exploits/recon_pvrsync_known
+/exploits/wscan
+/plugins/**/out/
+/plugins/**/*.class
+/plugins/**/classes.dex
+
+# Local scratch helpers and vendor source archives
+/.tmp_*
+/.local/
+/cd-24502f_opensource_*.tgz
+/inbox/
+
+# Local Codex attachments and device-run evidence may contain private data
+/.codex-remote-attachments/
+/artifacts/
+
+# Device APK pulls and jadx output stay as local research inputs
+/apks/**/*.apk
+/apks/**/*.so
+/apks/**/*_src/
+exploits/pvr_drm_identity_probe
+tools/__pycache__/
