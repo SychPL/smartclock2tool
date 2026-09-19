@@ -15,7 +15,7 @@ prints its URL and token in the log pane on the first screen. Token in the URL:
 | `/agent/exec?token=…&cmd=…` | run a shell command as the app's uid (a small substring blocklist refuses obviously destructive commands - it is not a sandbox) |
 | `/agent/probe?token=…&name=…` | trigger a probe: `rootssh`, `adbwifi`, `adbwifion`, `adbwifioff`, `status`, `getall`, `fullreport`, `devinfo`, `scan`, `checkadb`, `tryadb`, `mic`, `speaker`, `play`, `pull`, `apkserver`, `sendreport`, `devsettings`, `settings`, `floaton`, `taparm`, `tapdisarm`, `openaccessibility`, `selfupdate`, `home`, `openmenu`, `execstop` |
 | `/agent/screen?token=…` | a JPEG screenshot of the panel |
-| `/agent/dex?token=…&url=…&entry=…` | fetch a dex over HTTP and invoke an entry point (used while probing the vendor framework) |
+| `/agent/dex?token=…&url=…&entry=…&arg=…` | download a .dex and run it inside the app's process - see [examples/dex-plugin](../examples/dex-plugin/README.md) |
 
 The token is generated per install and stored in the app's SharedPreferences.
 

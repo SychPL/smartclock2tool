@@ -47,3 +47,6 @@ local.properties
 /apks/**/*_src/
 exploits/pvr_drm_identity_probe
 tools/__pycache__/
+
+# build output of the dex-plugin example
+/examples/dex-plugin/out/

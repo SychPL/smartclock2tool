@@ -135,6 +135,10 @@ $F/rootkit/clockroot -c "sh $F/rootkit/bootstrap.sh"      # the whole chain
 See `tools/README.md` for the agent endpoints and the token (the app prints it in
 its log).
 
+`examples/dex-plugin/` is a worked example of the agent's `/agent/dex` route: a
+small Java plugin, a `build.sh` (javac + d8) and a README that explains how the
+app loads it and what its limits are.
+
 ## Safety and things you should know
 
 * **Everything is runtime-only.** A power cycle removes root, the property entry,
