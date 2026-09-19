@@ -52,7 +52,7 @@ public final class BinderProbe {
             rep.line("SYSTEM / BINDER SERVICES", "ServiceManager.getService reflection failed: " + t);
         }
 
-        // 3) Context.getSystemService for standard names — shows which are app-reachable.
+        // 3) Context.getSystemService for standard names - shows which are app-reachable.
         String[] ctxServices = {
                 Context.AUDIO_SERVICE, Context.CONNECTIVITY_SERVICE, Context.DEVICE_POLICY_SERVICE,
                 Context.USB_SERVICE, Context.MEDIA_ROUTER_SERVICE, Context.POWER_SERVICE,

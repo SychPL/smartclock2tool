@@ -22,7 +22,7 @@ public final class SpeakerTester {
     public static boolean playRecording(Context ctx, Report rep) {
         File f = MicTester.lastWav;
         if (f == null || !f.exists() || !MicTester.lastWavValid) {
-            rep.line("MICROPHONE TEST", "PLAY RECORDING: no valid recording available — run TEST MICROPHONE first");
+            rep.line("MICROPHONE TEST", "PLAY RECORDING: no valid recording available - run TEST MICROPHONE first");
             return false;
         }
         try {

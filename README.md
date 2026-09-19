@@ -1,6 +1,6 @@
 # Lenovo Smart Clock 2 Tools
 
-Root, **ADB over Wi-Fi** and SSH on the Lenovo Smart Clock 2 — no cable, no
+Root, **ADB over Wi-Fi** and SSH on the Lenovo Smart Clock 2 - no cable, no
 flashing, nothing persisted. Everything here is runtime-only: a power cycle puts
 the clock back to stock.
 
@@ -15,7 +15,7 @@ Built and verified on the retail build **`LenovoCD-24502F_ROW_1.2.2.627_220105`*
 * **One press in the app** (`ROOT + ADB`) walks the whole chain: kernel write
   primitive → usermode helper as root → root channel + SSH + ADB over Wi-Fi.
 * **ADB over Wi-Fi** on the clock for `adb install`, `adb shell`, `logcat`,
-  `push/pull`, `screencap`, `input` — and for root (see below).
+  `push/pull`, `screencap`, `input` - and for root (see below).
 * **SSH as root** on port 2223, key-based (bring your own key).
 * **`ADB WI-FI` is a toggle**: the button shows `ADB WI-FI: ON` / `OFF` and
   writes `service.adb.tcp.port` accordingly.
@@ -28,7 +28,7 @@ Built and verified on the retail build **`LenovoCD-24502F_ROW_1.2.2.627_220105`*
    dense fast path (`ui32NumPhysChunks == ui32NumVirtChunks`) that writes
    `puiPhysicalOffset[idx] = uiOffset; bValid = TRUE` without bounds checks.
    The page array is a kmalloc-96 object, so a PMR mapped with enough chunks
-   makes the kernel read page pointers out of the *neighbouring* slab objects —
+   makes the kernel read page pointers out of the *neighbouring* slab objects -
    an OOB read of the physical page table. On this build the mapping is stable
    and calibration free: `pfn = 0x40C78 + (V - 0x10f310e0) / 36`, verified on
    15/15 consecutive kernel pages (no KASLR).
@@ -59,7 +59,7 @@ above).
 * the clock on the build above, reachable over the LAN;
 * host: **JDK 21**, **Android SDK 34** (`ANDROID_HOME`), Python 3 for the tools;
   the **NDK** (r27 tested) only if you rebuild the native payloads;
-* the app must be a **debug** build — the root channel is reached from the PC
+* the app must be a **debug** build - the root channel is reached from the PC
   through `run-as`.
 
 ## Build
@@ -74,8 +74,15 @@ build alone produces a working APK.
 
 ## Install and use
 
+On a stock clock there is **no ADB yet**, so the first install goes through the
+clock's own hidden browser: **[INSTALL.md](INSTALL.md)** walks through it step by
+step (TalkBack reads an APK URL out loud, the browser downloads it). The APK
+itself is on the [latest release](https://github.com/SychPL/smartclock2tool/releases/latest).
+
+If ADB is already available to you, it is just:
+
 ```bash
-adb install -r app/build/outputs/apk/debug/app-debug.apk     # USB or over the app's HTTP update
+adb install -r smartclock2tool-debug.apk
 ```
 
 Full step-by-step, including how to get the **first APK onto a stock clock with
@@ -97,8 +104,8 @@ adb shell run-as pl.mateusz.clockadbprobe \
 # uid=0(root) gid=0(root) groups=0(root) context=u:r:kernel:s0
 ```
 
-`shell` (uid 2000) can do a lot without root — `pm disable-user`, `pm grant`,
-`settings put` all work — and `run-as` above turns it into root, because the
+`shell` (uid 2000) can do a lot without root - `pm disable-user`, `pm grant`,
+`settings put` all work - and `run-as` above turns it into root, because the
 channel's allowlist accepts the app's uid.
 
 **SSH:** put your public key(s) into
@@ -137,7 +144,7 @@ its log).
 * **ADB over Wi-Fi disables adb authentication** (`ro.adb.secure=0`) because
   these clocks have no `/data/misc/adb/adb_keys` (the directory answers `ENOKEY`)
   and no UI to confirm a key. While the toggle is **ON**, *any host on your LAN*
-  can connect as `shell` — and `shell` can reach the root channel through
+  can connect as `shell` - and `shell` can reach the root channel through
   `run-as`. Keep it **OFF** when you are not using it.
 * While the chain is up, SELinux is **permissive** and `modprobe_path` is
   pointed at the bundled helper (the helper restores it).
@@ -148,7 +155,7 @@ its log).
 
 Source and tooling only, on purpose. The author's research data is **not**
 included: device dumps, fuzzing campaigns, the findings journal, pulled system
-files and the vendor's open-source tarball. There is no telemetry either — the
+files and the vendor's open-source tarball. There is no telemetry either - the
 report uploader ships with an empty `ENDPOINT`, so it refuses to send anything
 until you point it at a collector of your own.
 
@@ -159,7 +166,7 @@ own licenses.
 
 ## License
 
-**MIT** — see `LICENSE`.
+**MIT** - see `LICENSE`.
 
 The bundled third-party components keep their own terms: SimpleSSHD is GPLv3
 (and its library embeds Dropbear), so an APK you redistribute that contains those

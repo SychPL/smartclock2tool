@@ -32,7 +32,7 @@ public final class MicTester {
             return;
         }
         if (minBuf <= 0) {
-            rep.line("MICROPHONE TEST", "getMinBufferSize invalid (" + minBuf + ") — mic not usable with these params");
+            rep.line("MICROPHONE TEST", "getMinBufferSize invalid (" + minBuf + ") - mic not usable with these params");
             return;
         }
 
@@ -44,7 +44,7 @@ public final class MicTester {
             rep.log("MICROPHONE TEST", "AudioRecord state = " + rec.getState()
                     + " (1=INITIALIZED, 1=STATE_INITIALIZED)");
             if (rec.getState() != AudioRecord.STATE_INITIALIZED) {
-                rep.line("MICROPHONE TEST", "AudioRecord NOT initialized — RECORD_AUDIO permission missing or mic busy");
+                rep.line("MICROPHONE TEST", "AudioRecord NOT initialized - RECORD_AUDIO permission missing or mic busy");
                 rec.release();
                 return;
             }

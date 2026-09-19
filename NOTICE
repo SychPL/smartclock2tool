@@ -10,12 +10,12 @@ code; they come from SimpleSSHD and its bundled libraries.
    org.galexander.sshd)
    Files bundled here:
      app/src/main/assets/rootkit/stage/lib/libsimplesshd-jni.so   (contains the
-       JNI wrapper and the SSH server it embeds — Dropbear)
+       JNI wrapper and the SSH server it embeds - Dropbear)
      app/src/main/assets/rootkit/stage/lib/libbuffersu.so
      app/src/main/assets/rootkit/stage/lib/libscp.so
      app/src/main/assets/rootkit/stage/lib/libsftp-server.so
      app/src/main/assets/rootkit/stage/lib/librsync.so   (the rsync library
-       SimpleSSHD bundles; upstream librsync is LGPL-2.1 — verify against the
+       SimpleSSHD bundles; upstream librsync is LGPL-2.1 - verify against the
        build you redistribute)
 
    GPL note: if you redistribute an APK containing these binaries you must also

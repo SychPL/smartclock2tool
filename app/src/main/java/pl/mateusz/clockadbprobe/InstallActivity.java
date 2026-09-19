@@ -33,7 +33,8 @@ import java.net.URL;
  */
 public class InstallActivity extends Activity {
 
-    static final String DEFAULT_URL = "http://YOUR-PC:8000/app-debug.apk";
+    static final String DEFAULT_URL =
+            "https://github.com/SychPL/smartclock2tool/releases/latest/download/smartclock2tool-debug.apk";
     private static volatile boolean installPending;
 
     private EditText urlField;
@@ -78,7 +79,7 @@ public class InstallActivity extends Activity {
         int s = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, Integer.MIN_VALUE);
         String m = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
         if (s == PackageInstaller.STATUS_PENDING_USER_ACTION) {
-            // The confirm dialog arrives as EXTRA_INTENT — the app itself must
+            // The confirm dialog arrives as EXTRA_INTENT - the app itself must
             // launch it, otherwise nothing ever shows on screen.
             Intent confirm = intent.getParcelableExtra(Intent.EXTRA_INTENT);
             try {
