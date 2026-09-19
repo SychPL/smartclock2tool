@@ -22,6 +22,8 @@ Built and verified on the retail build **`LenovoCD-24502F_ROW_1.2.2.627_220105`*
 * **A LAN control agent** (HTTP, token) so a PC can drive probes, run commands
   and push/pull files. The host tools in `tools/` use it.
 
+Every feature, one by one, with where it lives in the code: **[FEATURES.md](FEATURES.md)**.
+
 ## How it works (short version)
 
 1. **The bug.** `_PMRLogicalOffsetToPhysicalOffset()` in the PowerVR DDK has a
