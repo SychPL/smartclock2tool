@@ -6,7 +6,7 @@
 # hard-owned runtime tree and starts the hardened Dropbear launcher on
 # <clock-ip>:2223, then ALWAYS restores modprobe_path to /sbin/modprobe.
 #
-# Design constraints:
+# Design constraints (see docs/pvr-root-ssh-methodology.md):
 #   * every external tool is called by absolute path (PATH cannot shadow it);
 #   * no grep/sed/cat/awk: POSIX sh builtins plus toybox only;
 #   * fail-closed stage gating before the linker runs;
@@ -359,15 +359,15 @@ start_app_channel() {
     # The app-facing root channel: clockroot serves commands over a Unix socket
     # in the app's private directory, gated by SO_PEERCRED, so the app (and the
     # agent's shell) can run root commands with no key material at all:
-    #     files/clockroot -c 'id'
+    #     files/rootkit/clockroot -c 'id'
     # This is what makes root usable *from the app*; Dropbear stays for humans.
     app_channel=absent
-    if [ ! -x "$APP_FILES/clockroot" ]; then
+    if [ ! -x "$APP_FILES/rootkit/clockroot" ]; then
         trace "app channel: clockroot binary missing"
         return 0
     fi
-    "$APP_FILES/clockroot" --serve >>"$TRACE" 2>&1 || true
-    out=$("$APP_FILES/clockroot" -c 'id' 2>>"$TRACE" || true)
+    "$APP_FILES/rootkit/clockroot" --serve >>"$TRACE" 2>&1 || true
+    out=$("$APP_FILES/rootkit/clockroot" -c 'id' 2>>"$TRACE" || true)
     trace "app channel probe: $out"
     case "$out" in
         *"uid=0(root)"*) app_channel=ready ;;

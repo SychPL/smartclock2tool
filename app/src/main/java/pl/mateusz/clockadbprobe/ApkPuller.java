@@ -25,9 +25,9 @@ public final class ApkPuller {
     };
 
     private static final String[] EXTRA_FILES = {
-            // property/SELinux contexts - plain text, often world-readable on /system & /vendor
+            // property/SELinux contexts — plain text, often world-readable on /system & /vendor
             "/system/etc/selinux/plat_property_contexts",
-            "/system/etc/sepolicy/precompiled_sepolicy", // binary, large - skip on failure
+            "/system/etc/sepolicy/precompiled_sepolicy", // binary, large — skip on failure
             "/vendor/etc/selinux/vendor_property_contexts",
             "/vendor/etc/selinux/precompiled_sepolicy",
             "/odm/etc/selinux/odm_property_contexts",

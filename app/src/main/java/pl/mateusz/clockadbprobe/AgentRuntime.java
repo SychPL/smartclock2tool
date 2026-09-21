@@ -6,6 +6,10 @@ import android.content.pm.PackageInfo;
 import android.os.Build;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import pl.mateusz.clockadbprobe.bridge.AdbState;
+import pl.mateusz.clockadbprobe.bridge.BridgeFiles;
+import pl.mateusz.clockadbprobe.bridge.ExecutorLock;
+import pl.mateusz.clockadbprobe.bridge.Executions;
 
 /** Idempotent process-level bootstrap for the authenticated LAN agent. */
 final class AgentRuntime {
@@ -24,6 +28,85 @@ final class AgentRuntime {
         });
     }
 
+
+    /** Replaceable so a test can hold the chain still instead of running an exploit. */
+    interface ChainStarter {
+        int start(Context application, RootKit.Log log) throws Exception;
+    }
+
+    private static volatile ChainStarter chainStarter = new ChainStarter() {
+        public int start(Context application, RootKit.Log log) throws Exception {
+            return RootKit.run(application, log);
+        }
+    };
+
+    static void setChainStarter(ChainStarter starter) {
+        chainStarter = starter == null ? new ChainStarter() {
+            public int start(Context application, RootKit.Log log) throws Exception {
+                return RootKit.run(application, log);
+            }
+        } : starter;
+    }
+
+    /** The trace is installed by whoever touches the bridge first; tests install their own. */
+    private static void ensureBridgeState(Context application) {
+        if (Executions.lock() == null && application != null) BridgeFiles.get(application);
+    }
+
+    /** One chain at a time, whoever asks: the lock and the executor trace are taken together. */
+    static boolean startChain(final Context application) {
+        ensureBridgeState(application);
+        final String execId = Executions.execId("agent", "local", "rootssh");
+        Executions.Grant grant = Executions.begin(execId, "running", ExecutorLock.PRIVILEGED);
+        if (!grant.granted) {
+            Report.get().log("ROOTKIT", "refused: " + grant.reason);
+            return false;
+        }
+        new Thread(new Runnable() { public void run() {
+            try {
+                Executions.lock().promote(execId);
+                int rc = chainStarter.start(application, new RootKit.Log() {
+                    public void line(String text) {
+                        Report.get().log("ROOTKIT", text);
+                    }
+                });
+                Report.get().log("ROOTKIT", "bootstrap exit " + rc + " | " + RootKit.sshHint());
+            } catch (Throwable t) {
+                Report.get().exception("AgentRuntime.rootssh", t);
+            } finally {
+                Executions.end(execId);
+            }
+        }}).start();
+        return true;
+    }
+
+    /** The ADB toggle without an Activity; until now it existed only behind the screen. */
+    static boolean switchAdb(final Context application, final boolean on) {
+        ensureBridgeState(application);
+        final String execId = Executions.execId("agent", "local", on ? "adbwifion" : "adbwifioff");
+        Executions.Grant grant = Executions.begin(execId, "running", ExecutorLock.PRIVILEGED);
+        if (!grant.granted) {
+            Report.get().log("ADBWIFI", "refused: " + grant.reason);
+            return false;
+        }
+        new Thread(new Runnable() { public void run() {
+            try {
+                RootKit.runAdbWifi(application, new RootKit.Log() {
+                    public void line(String text) {
+                        Report.get().log("ADBWIFI", text);
+                    }
+                }, on);
+                boolean listening = AdbState.listening();
+                Report.get().log("ADBWIFI", on ? AdbState.onResult("", listening) : AdbState.offResult("", listening));
+            } catch (Throwable t) {
+                Report.get().exception("AgentRuntime.adbwifi", t);
+            } finally {
+                Executions.end(execId);
+            }
+        }}).start();
+        return true;
+    }
+
     /** Handles agent probes that remain available when no Activity is foregrounded. */
     static boolean trigger(Context application, String name) {
         if ("execstop".equals(name)) return ExecUtil.cancelRemoteShell();
@@ -37,22 +120,12 @@ final class AgentRuntime {
         if ("rootssh".equals(name)) {
             // Same code path as the ROOT + SSH button, reachable over the LAN so
             // the chain can be driven and watched without touching the screen.
-            // RootKit.run blocks for the whole bootstrap, so it must not run on
-            // the agent's request thread.
-            new Thread(new Runnable() { public void run() {
-                try {
-                    int rc = RootKit.run(application, new RootKit.Log() {
-                        public void line(String text) {
-                            Report.get().log("ROOTKIT", text);
-                        }
-                    });
-                    Report.get().log("ROOTKIT", "bootstrap exit " + rc + " | "
-                            + RootKit.sshHint());
-                } catch (Throwable t) {
-                    Report.get().exception("AgentRuntime.rootssh", t);
-                }
-            }}).start();
-            return true;
+            // It goes through Executions like every other entry point: without
+            // that, two LAN calls could run two chains at once (SPEC 0.12 pkt 8.4).
+            return startChain(application);
+        }
+        if ("adbwifion".equals(name) || "adbwifioff".equals(name)) {
+            return switchAdb(application, "adbwifion".equals(name));
         }
         if ("floaton".equals(name)) {
             // Toggle the floating nav overlay

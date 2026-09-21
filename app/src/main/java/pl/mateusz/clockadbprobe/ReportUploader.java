@@ -12,22 +12,15 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 /**
- * One-shot manual upload of the full report as JSON to a collector of YOUR
- * choosing. Disabled by default: an empty ENDPOINT means no data ever leaves the
- * device, and nothing else in the app performs network writes.
- *
- * To use it, point ENDPOINT at your own endpoint. The report contains device
- * identifiers, the Wi-Fi IP and the full probe output, so only send it where you
- * accept that.
+ * One-shot manual upload of the full report as JSON to the user's recon
+ * endpoint. Only invoked from the SEND REPORT button after a confirmation
+ * dialog; nothing else in the app performs network writes.
  */
 public final class ReportUploader {
 
-    public static final String ENDPOINT = "";
+    public static final String ENDPOINT = "https://recon.robot.org.pl/";
 
     public static String upload(String reportText, String appVersion) throws Exception {
-        if (ENDPOINT.isEmpty()) {
-            return "upload disabled (set ReportUploader.ENDPOINT to your own collector)";
-        }
         JSONObject device = new JSONObject();
         device.put("manufacturer", str(Build.MANUFACTURER));
         device.put("brand", str(Build.BRAND));

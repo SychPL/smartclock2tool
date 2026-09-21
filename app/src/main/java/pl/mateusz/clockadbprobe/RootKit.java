@@ -135,7 +135,7 @@ public final class RootKit {
             throws IOException, InterruptedException {
         File bin = new File(dir(ctx), "clockroot");
         if (!bin.exists()) {
-            throw new IOException("no root channel (" + bin + ") - run ROOT + ADB first");
+            throw new IOException("no root channel (" + bin + ") — run ROOT + ADB first");
         }
         if (!bin.canExecute()) {
             bin.setExecutable(true, true);
@@ -215,7 +215,7 @@ public final class RootKit {
         try {
             String ssh = channel(ctx, "netstat -ltn | grep 2223").trim();
             out.add("ssh: " + (ssh.isEmpty()
-                    ? "2223 not listening (optional - root and adb work without it)"
+                    ? "2223 not listening (optional — root and adb work without it)"
                     : "2223 listening"));
         } catch (Throwable t) {
             out.add("ssh: not checked (" + t.getMessage() + ")");

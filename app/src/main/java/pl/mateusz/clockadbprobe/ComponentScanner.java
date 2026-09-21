@@ -171,7 +171,7 @@ public final class ComponentScanner {
         if (exported) rep.line(section, s);
         if (exported && matchesAny(pi.packageName, VENDOR_TERMS)) {
             vendorFindings.append("EXPORTED ").append(section.substring(9)).append(": ").append(s)
-                    .append("  [class: SAFE TO QUERY / POTENTIALLY STATE-CHANGING / UNKNOWN - not invoked]\n");
+                    .append("  [class: SAFE TO QUERY / POTENTIALLY STATE-CHANGING / UNKNOWN — not invoked]\n");
         }
     }
 

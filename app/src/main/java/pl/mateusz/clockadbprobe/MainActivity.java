@@ -34,6 +34,27 @@ public class MainActivity extends Activity {
     private boolean pendingGetAll = false;
     private AgentServer.ProbeTrigger activityProbeTrigger;
 
+    /**
+     * Leaves the tools the way the user expects: back to the launcher that started them (Helios is the home
+     * app on this clock), and only if that fails, by finishing this activity.
+     */
+    private void leave() {
+        try {
+            android.content.Intent home = new android.content.Intent(android.content.Intent.ACTION_MAIN);
+            home.addCategory(android.content.Intent.CATEGORY_HOME);
+            home.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(home);
+        } catch (Throwable t) {
+            Report.get().exception("MainActivity.leave", t);
+        }
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        leave();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +69,10 @@ public class MainActivity extends Activity {
         } catch (Throwable t) {
             Report.get().exception("MainActivity.versionLabel", t);
         }
+        // The clock has no navigation bar and no recents: whoever opens these tools has to be able to leave
+        // them, so the way out is a visible button rather than a gesture nobody can perform on this device.
+        android.widget.Button exit = findViewById(R.id.btnExit);
+        if (exit != null) exit.setOnClickListener(v -> leave());
 
         wire(R.id.btnRootSsh, new Runnable() { public void run() { rootAll(); }});
         wire(R.id.btnStatus, new Runnable() { public void run() { statusCheck(); }});
@@ -220,7 +245,7 @@ public class MainActivity extends Activity {
     /** Runs probe on a worker thread; disables buttons while running. */
     private void runProbe(final String name, final Runnable body) {
         if (!OperationGate.tryStartProbe()) {
-            Toast.makeText(this, "Busy - wait for current test", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Busy — wait for current test", Toast.LENGTH_SHORT).show();
             return;
         }
         running = true;
@@ -231,7 +256,7 @@ public class MainActivity extends Activity {
                     body.run();
                     Report.get().line("CONCLUSIONS", "[" + Report.ts() + "] " + name + " finished.");
                     ui.post(new Runnable() { public void run() {
-                        logLine(name + " - done. Opening report.");
+                        logLine(name + " — done. Opening report.");
                         openReportIfDesired(name);
                     }});
                 } catch (final Throwable t) {
@@ -287,7 +312,7 @@ public class MainActivity extends Activity {
                     MicTester.test(MainActivity.this, Report.get());
                 }});
             } else {
-                Report.get().line("MICROPHONE TEST", "AGENT: RECORD_AUDIO not granted - mic skipped");
+                Report.get().line("MICROPHONE TEST", "AGENT: RECORD_AUDIO not granted — mic skipped");
             }
             return;
         }
@@ -322,7 +347,7 @@ public class MainActivity extends Activity {
         }
         if ("taparm".equals(name)) {
             AutoTapService.armed = true;
-            Report.get().line("COMMAND RESULTS", "AUTOTAP armed - install dialogs will be auto-confirmed");
+            Report.get().line("COMMAND RESULTS", "AUTOTAP armed — install dialogs will be auto-confirmed");
             return;
         }
         if ("tapdisarm".equals(name)) {
@@ -366,7 +391,7 @@ public class MainActivity extends Activity {
                         + "- speaker tone\n\n"
                         + "This test will attempt to change debugging state.\n"
                         + "It will not modify bootloader or partitions.\n"
-                        + "The report is NOT uploaded automatically - use SEND REPORT afterwards.")
+                        + "The report is NOT uploaded automatically — use SEND REPORT afterwards.")
                 .setPositiveButton("Run all", new android.content.DialogInterface.OnClickListener() {
                     public void onClick(android.content.DialogInterface d, int w) { getAll(); }
                 })
@@ -385,7 +410,7 @@ public class MainActivity extends Activity {
                 requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQ_MIC);
                 return;
             }
-            Report.get().line("MICROPHONE TEST", "AGENT: RECORD_AUDIO not granted - mic part skipped");
+            Report.get().line("MICROPHONE TEST", "AGENT: RECORD_AUDIO not granted — mic part skipped");
             runGetAllBody(false);
             return;
         }
@@ -466,7 +491,7 @@ public class MainActivity extends Activity {
         }});
     }
 
-    /** Legacy attempt: setprop service.adb.tcp.port. Kept for the agent only -
+    /** Legacy attempt: setprop service.adb.tcp.port. Kept for the agent only —
      *  the property service refuses it, which is why the real path writes the
      *  property area directly (RootKit.runAdbWifi). */
     private void tryAdbWifiBody(Report rep) {
@@ -526,10 +551,10 @@ public class MainActivity extends Activity {
     { fileServerShared = fileServer; }
 
     /** Exposes the pulled files on http://<clock-ip>:8443/ for PC download.
-     *  Socket bind happens on a worker thread - StrictMode forbids it on main. */
+     *  Socket bind happens on a worker thread — StrictMode forbids it on main. */
     private void toggleApkServer() {
         if (!OperationGate.tryStartProbe()) {
-            Toast.makeText(this, "Busy - wait for current test", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Busy — wait for current test", Toast.LENGTH_SHORT).show();
             return;
         }
         if (fileServer.isRunning()) {

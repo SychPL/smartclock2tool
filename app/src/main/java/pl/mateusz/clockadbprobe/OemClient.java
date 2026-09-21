@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Raw binder client for the unprotected exported OEM service in com.google.oem
  * (system uid). We speak the interface descriptor directly instead of shipping
- * matching AIDL - transaction codes come from the decompiled stub
+ * matching AIDL — transaction codes come from the decompiled stub
  * (IAssistantOemService.TRANSACTION_takeScreenshot == 13).
  */
 public final class OemClient {

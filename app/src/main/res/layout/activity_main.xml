@@ -29,6 +29,21 @@
             android:layout_height="wrap_content"
             android:textSize="9sp"
             android:text="v?" />
+
+        <!-- The clock has no navigation bar, so an app without its own way out traps the user. -->
+        <Button
+            android:id="@+id/btnExit"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginStart="8dp"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textSize="12sp"
+            android:text="Wyjdź" />
     </LinearLayout>
 
     <LinearLayout

@@ -16,7 +16,7 @@ import java.util.Locale;
 public class AutoTapService extends AccessibilityService {
 
     public static volatile boolean armed = false;
-    /** Set by onServiceConnected - proves the system actually bound the service. */
+    /** Set by onServiceConnected — proves the system actually bound the service. */
     public static volatile boolean connected = false;
     /** Live instance for the floating nav overlay (global actions). */
     public static volatile AutoTapService instance;
@@ -24,10 +24,6 @@ public class AutoTapService extends AccessibilityService {
     private static final String[] INSTALLERS = {
             "com.android.packageinstaller", "com.google.android.packageinstaller"
     };
-    /** Labels that mean "confirm" on the installer dialog. The list is
-     *  deliberately multilingual: these are the texts the dialogs really show on
-     *  localised builds (Polish and German included), so they must stay verbatim
-     *  - translating them would break auto-confirmation, not the UI. */
     private static final String[] CONFIRM_TEXTS = {
             "install", "zainstaluj", "zaktualizuj", "update", "installieren"
     };

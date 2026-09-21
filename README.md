@@ -125,6 +125,15 @@ $F/rootkit/clockroot -c "sh $F/rootkit/adbwifi.sh on"     # or: off
 $F/rootkit/clockroot -c "sh $F/rootkit/bootstrap.sh"      # the whole chain
 ```
 
+## Letting another app use this
+
+Another app on the clock can ask this tool for a short list of privileged operations rather than for root: switch
+ADB, grant itself a permission it declares, become the home app, take the microphone back from the factory shell,
+install its own update. It gets no root, no shell and no way to run a command of its own choosing.
+
+Every app is named and asked about before anything happens, and an app that reappears with a different signing
+certificate starts from zero. The interface is **[docs/BRIDGE-API.md](docs/BRIDGE-API.md)**.
+
 ## Host tools (`tools/`)
 
 | tool | purpose |

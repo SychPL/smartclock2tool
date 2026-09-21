@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Everything this app does stays on your LAN. INTERNET is used for the
-         control agent (HTTP server on 8555, token printed in the log pane), for
-         APK self-update over HTTP from a server of your own, and to probe the
-         local address for an ADB TCP listener. No telemetry: the report
-         uploader ships with an empty ENDPOINT and refuses to send anything. -->
+    <!-- All tests are local. INTERNET is only used to probe 127.0.0.1 / own IP
+         for an ADB TCP listener. No telemetry, no external servers. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -38,6 +35,19 @@
             android:name=".InstallActivity"
             android:exported="false"
             android:launchMode="singleTop" />
+
+        <!-- SPEC 0.12: the only way in from another app. launchMode standard on purpose: in another task the
+             system would cancel the call and getCallingPackage() would return nothing. -->
+        <activity
+            android:name=".BridgeActivity"
+            android:exported="true"
+            android:launchMode="standard"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="pl.mateusz.clockadbprobe.action.BRIDGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <service
             android:name=".AutoTapService"
             android:exported="true"

@@ -123,8 +123,8 @@ ip=$(getprop dhcp.wlan0.ipaddress 2>/dev/null)
 case "$ip" in
     [0-9]*.[0-9]*.[0-9]*.[0-9]*) LISTEN="$ip:2223" ;;
 esac
-if [ -x "$F/clockroot" ]; then
-    "$F/clockroot" -c "kill \$(cat $R/dropbear-root.pid) 2>/dev/null; \
+if [ -x "$CHANNEL" ]; then
+    "$CHANNEL" -c "kill \$(cat $R/dropbear-root.pid) 2>/dev/null; \
         cd $R && setsid /system/bin/linker $R/simplesshd_dropbear_launcher \
         $R/lib/libsimplesshd-jni.so $R $R/lib $LISTEN \
         > $R/ssh.out 2> $R/ssh.err < /dev/null &" >/dev/null 2>&1
@@ -152,7 +152,7 @@ say "== 7/7 ADB over Wi-Fi"
 if [ -f "$D/adbwifi.sh" ]; then
     # "on", not the no-argument form: the script toggles when given no mode, and
     # the bootstrap must always end with ADB over Wi-Fi up.
-    "$F/clockroot" -c "sh $D/adbwifi.sh on" 2>&1 | while read -r line; do say "   $line"; done
+    "$CHANNEL" -c "sh $D/adbwifi.sh on" 2>&1 | while read -r line; do say "   $line"; done
 else
     say "   missing $D/adbwifi.sh"
 fi
@@ -169,7 +169,7 @@ if netstat -ltn 2>/dev/null | grep -q ':5555'; then
 else
     say "ADB over Wi-Fi is not listening on 5555"
 fi
-if [ -x "$F/clockroot" ]; then
-    say "   app root channel: $("$F/clockroot" -c id 2>&1 | head -n 1)"
+if [ -x "$CHANNEL" ]; then
+    say "   app root channel: $("$CHANNEL" -c id 2>&1 | head -n 1)"
 fi
 exit 0

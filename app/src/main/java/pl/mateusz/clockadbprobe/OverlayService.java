@@ -169,7 +169,7 @@ public class OverlayService extends Service {
             }
         });
         // Long-press on the dot stops the service completely: bar, dot and
-        // notification all disappear - no trace left on the screen.
+        // notification all disappear — no trace left on the screen.
         d.setOnLongClickListener(new View.OnLongClickListener() {
             public boolean onLongClick(View v) {
                 stopSelf();
