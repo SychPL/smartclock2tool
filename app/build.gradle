@@ -12,8 +12,8 @@ android {
         // targetSdk 27: keeps hidden-API reflection available (enforcement starts
         // for apps targeting 28+) and matches the Smart Clock 2 era platform.
         targetSdk 27
-        versionCode 32
-        versionName "2.19.0"
+        versionCode 33
+        versionName "2.20.0"
     }
 
     buildTypes {

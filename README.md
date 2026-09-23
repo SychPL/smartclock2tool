@@ -84,7 +84,7 @@ itself is on the [latest release](https://github.com/SychPL/smartclock2tool/rele
 If ADB is already available to you, it is just:
 
 ```bash
-adb install -r smartclock2tool-debug.apk
+adb install -r smartclock2tool-2.19.0.apk
 ```
 
 Full step-by-step, including how to get the **first APK onto a stock clock with

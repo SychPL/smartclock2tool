@@ -56,6 +56,24 @@ restart_adbd() {
     [ -n "$pid" ] && kill "$pid"
 }
 
+# Turn plain ADB on even when Developer options / USB debugging were never
+# enabled: without them adbd does not run at all, so restart_adbd has nothing to
+# kill and nothing ever listens. We are root here (SELinux permissive after the
+# bootstrap), so we set the framework switch and the init-level usb props
+# ourselves. Setting sys.usb.config re-fires init's property triggers, which
+# start adbd; adb_enabled=1 stops UsbDeviceManager from turning it back off.
+enable_adbd() {
+    settings put global adb_enabled 1 2>/dev/null
+    cur=$(getprop persist.sys.usb.config)
+    case ",$cur," in
+        *,adb,*) ;;
+        *) [ -z "$cur" ] && setprop persist.sys.usb.config adb \
+                         || setprop persist.sys.usb.config "$cur,adb" ;;
+    esac
+    setprop sys.usb.config "$(getprop persist.sys.usb.config)"
+    echo "adbwifi: adb_enabled=$(settings get global adb_enabled 2>/dev/null) persist.sys.usb.config=$(getprop persist.sys.usb.config)"
+}
+
 wait_port() {
     # $1 = 1 want listening, $1 = 0 want it gone
     want="$1"
@@ -83,6 +101,7 @@ if [ "$ACTION" = "on" ]; then
         /system/bin/linker "$PA" "$SE" --set ro.adb.secure 0 || exit 1
         echo "adbwifi: ro.adb.secure=$(getprop ro.adb.secure)"
     fi
+    enable_adbd
     restart_adbd
     if wait_port 1; then
         echo "adbwifi: ON  ->  adb connect $ip:$PORT"

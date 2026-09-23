@@ -74,6 +74,10 @@ public final class RootKit {
         if (parent != null && !parent.exists() && !parent.mkdirs()) {
             throw new IOException("cannot create " + parent);
         }
+        // A prior root left clockroot (and other payloads) running; opening the
+        // running binary for write fails with ETXTBSY. Unlink first: the daemon
+        // keeps its inode, we write a fresh file. Re-copy stays "always".
+        dst.delete();
         InputStream in = am.open(assetPath);
         try {
             OutputStream out = new FileOutputStream(dst);
