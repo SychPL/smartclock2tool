@@ -11,7 +11,7 @@ cable, no soldering and no root.
 | ADB already available | [Install with adb install](#if-you-already-have-adb) |
 | APK installed | [First run: one press](#first-run-one-press) |
 
-* The APK to install: `smartclock2tool-<version>.apk` (for example `smartclock2tool-2.19.0.apk`) from the
+* The APK to install: `smartclock2tool.apk` (the same file as `smartclock2tool-<version>.apk`) from the
   [latest release](https://github.com/SychPL/smartclock2tool/releases/latest).
 * Credits for the no-cable install trick: see [Credits](#credits).
 * Supported firmware: `LenovoCD-24502F_ROW_1.2.2.627_220105` (check with
@@ -29,8 +29,12 @@ phone with the Google Home app, a Google account whose Calendar the clock shows,
 and this URL:
 
 ```
-https://github.com/SychPL/smartclock2tool/releases/download/v2.19.0/smartclock2tool-2.19.0.apk
+https://github.com/SychPL/smartclock2tool/releases/latest/download/smartclock2tool.apk
 ```
+
+The link always points at the newest release, so the URL never goes stale. Older versions
+(2.19.0 and before) cannot start ADB on a clock where USB debugging was never switched on,
+and a second ROOT + ADB run fails with `ETXTBSY (Text file busy)` - both fixed in 2.20.0.
 
 ### 1. Put that URL on the clock's screen
 In Google Calendar create an event in the near future whose **title is only the
@@ -76,7 +80,7 @@ Then continue with [First run: one press](#first-run-one-press).
 * GitHub redirects the download to a CDN. If the clock's old browser refuses,
   host the same file on your own LAN instead: run `python3 tools/filedrop_server.py`
   on your PC (it serves `dist/` on port 8000), put the APK there, and use
-  `http://<your-pc-ip>:8000/smartclock2tool-2.19.0.apk` as the event title;
+  `http://<your-pc-ip>:8000/smartclock2tool.apk` as the event title;
 * the clock needs a working Wi-Fi connection (the URL is downloaded, not bundled).
 
 ---
@@ -87,7 +91,7 @@ Only for the case where ADB is already set up on your clock (USB debugging
 enabled, or an already-rooted clock) - otherwise use the TalkBack method above.
 
 ```bash
-adb install -r smartclock2tool-2.19.0.apk
+adb install -r smartclock2tool.apk
 ```
 
 Or build it yourself:
@@ -161,6 +165,8 @@ property entry and the listeners, and the clock behaves like stock again. Press
 | symptom | cause / fix |
 |---|---|
 | `adb connect` refused | ADB over Wi-Fi is OFF, or the chain has not run since the last boot - press `ROOT + ADB`, then check `STATUS` |
+| `clockroot: open failed: ETXTBSY (Text file busy)` | version 2.19.0 or older run a second time: update to 2.20.0 or newer (from the tool: INSTALL APK, or the URL above); until then reboot the clock and press `ROOT + ADB` once |
+| log ends with `adbd is not listening on 5555` | version 2.19.0 or older on a clock where USB debugging was never enabled: update to 2.20.0 or newer and press `ROOT + ADB` again |
 | APK downloaded but will not install | allow the browser to install unknown apps when prompted; if there is no prompt, open the file again from Downloads |
 | app installed but no icon | you need the launcher from step 7 of the TalkBack method |
 | log stops half way, clock reboots | the write primitive hit an unlucky heap layout; power-cycle and press the button again (see the "can panic the kernel" note in the README) |
