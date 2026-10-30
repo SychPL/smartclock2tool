@@ -120,7 +120,8 @@ public final class BridgeActivity extends Activity {
     }
 
     private BridgeFlow.Facts facts() {
-        return new BridgeFlow.Facts(BridgeExecutor.firmwareSupported(), executor.chain(), precondition());
+        return new BridgeFlow.Facts(BridgeExecutor.firmwareSupported(), executor.chain(), precondition(),
+                BridgeExecutor.firmwareSeen());
     }
 
     /** Conditions that make an operation impossible here, checked before any consent is asked. */

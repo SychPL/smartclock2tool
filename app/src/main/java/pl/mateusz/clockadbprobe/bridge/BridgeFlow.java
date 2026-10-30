@@ -28,11 +28,17 @@ public final class BridgeFlow {
         public final boolean firmwareSupported;
         public final String chain;              // idle, running or unknown
         public final String preconditionError;  // null when the operation may run here
+        public final String firmwareDetail;     // the build string seen, for a wrong_firmware answer
 
         public Facts(boolean firmwareSupported, String chain, String preconditionError) {
+            this(firmwareSupported, chain, preconditionError, "");
+        }
+
+        public Facts(boolean firmwareSupported, String chain, String preconditionError, String firmwareDetail) {
             this.firmwareSupported = firmwareSupported;
             this.chain = chain;
             this.preconditionError = preconditionError;
+            this.firmwareDetail = firmwareDetail == null ? "" : firmwareDetail;
         }
     }
 
@@ -114,7 +120,7 @@ public final class BridgeFlow {
 
         // from here on this is new work, so the conditions for new work apply
         if (Ops.needsFirmware(request.op) && !facts.firmwareSupported) {
-            return Decision.of(Kind.ANSWER, "wrong_firmware", "", identity, revision);
+            return Decision.of(Kind.ANSWER, "wrong_firmware", facts.firmwareDetail, identity, revision);
         }
         if (facts.preconditionError != null) {
             return Decision.of(Kind.ANSWER, facts.preconditionError, "", identity, revision);
