@@ -76,7 +76,7 @@ asked about from scratch.
   "adb_listening": true,
   "ssh": false,
   "chain": "idle",
-  "firmware": "LenovoCD-24502F_ROW_1.2.2.627_220105",
+  "firmware": "1.2.2_627_LenovoCD-24502F_ROW_2201050321",
   "firmware_supported": true,
   "tool_version": "2.19.0",
   "mic_holders": ["com.google.android.apps.mediashell"],
@@ -102,8 +102,10 @@ times only within the same `boot_id`; across a restart they mean nothing.
 
 ## Firmware
 
-The root chain is calibrated for `LenovoCD-24502F_ROW_1.2.2.627_220105`. On anything else `root_adb_on` answers
-`wrong_firmware` without running. Every other operation works on any build that has the chain up.
+The root chain is calibrated for `LenovoCD-24502F_ROW_1.2.2.627_220105`. That string is part of `Build.FINGERPRINT`;
+the snapshot's `firmware` field is `Build.DISPLAY`, which shows the same build in another format, so decide by
+`firmware_supported`, not by comparing `firmware`. On anything else `root_adb_on` answers `wrong_firmware` without
+running, with the fingerprint it saw in `detail`. Every other operation works on any build that has the chain up.
 
 ## One caveat worth knowing
 

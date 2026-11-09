@@ -14,8 +14,9 @@ cable, no soldering and no root.
 * The APK to install: `smartclock2tool.apk` (the same file as `smartclock2tool-<version>.apk`) from the
   [latest release](https://github.com/SychPL/smartclock2tool/releases/latest).
 * Credits for the no-cable install trick: see [Credits](#credits).
-* Supported firmware: `LenovoCD-24502F_ROW_1.2.2.627_220105` (check with
-  `getprop ro.build.display.id` once you have any shell).
+* Supported firmware: `LenovoCD-24502F_ROW_1.2.2.627_220105`. The string is part of the
+  build fingerprint (`getprop ro.build.fingerprint`, or the tool's REPORT, section BUILD);
+  `ro.build.display.id` shows the same build as `1.2.2_627_LenovoCD-24502F_ROW_2201050321`.
 
 ---
 
@@ -167,6 +168,8 @@ property entry and the listeners, and the clock behaves like stock again. Press
 | `adb connect` refused | ADB over Wi-Fi is OFF, or the chain has not run since the last boot - press `ROOT + ADB`, then check `STATUS` |
 | `clockroot: open failed: ETXTBSY (Text file busy)` | version 2.19.0 or older run a second time: update to 2.20.0 or newer (from the tool: INSTALL APK, or the URL above); until then reboot the clock and press `ROOT + ADB` once |
 | log ends with `adbd is not listening on 5555` | version 2.19.0 or older on a clock where USB debugging was never enabled: update to 2.20.0 or newer and press `ROOT + ADB` again |
+| root works but `adb: OFF`, log shows `setprop: failed to set property 'persist.sys.usb.config'` | the system refused to switch USB debugging on by itself: press `DEV SETTINGS`, enable **USB debugging** (and the main Developer options switch if needed), return to the tool and press `STATUS` |
+| no way to leave the tools | press **EXIT** at the top, next to the version label (2.19.0 and 2.20.0 label it `Wyjdź`) |
 | APK downloaded but will not install | allow the browser to install unknown apps when prompted; if there is no prompt, open the file again from Downloads |
 | app installed but no icon | you need the launcher from step 7 of the TalkBack method |
 | log stops half way, clock reboots | the write primitive hit an unlucky heap layout; power-cycle and press the button again (see the "can panic the kernel" note in the README) |

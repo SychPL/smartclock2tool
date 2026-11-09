@@ -28,10 +28,11 @@ Two columns: buttons on the left, live log on the right (monospace, auto-scroll)
 | **ADB WI-FI** | the toggle. Label shows the live state (`ADB WI-FI: ON` / `OFF`); pressing it flips it. |
 | **REPORT** | runs every probe module in sequence and opens the report screen. |
 | **UPDATE APK** | InstallActivity: downloads an APK over the LAN (plain HTTP) and installs it. Defaults to the release asset. |
-| **DEV SETTINGS** | opens the hidden Developer options (useful to look at vendor toggles). |
+| **DEV SETTINGS** | opens the hidden Developer options: vendor toggles, and **USB debugging** when `ROOT + ADB` leaves ADB OFF. |
 | **CLEAR LOG** | clears the log pane. |
 
-The version label shows versionName and versionCode of the installed build.
+The version label shows versionName and versionCode of the installed build. **EXIT**
+next to it leaves the tools: the clock has no navigation bar, so there is no other way out.
 
 ## 2. The root chain (one press)
 
