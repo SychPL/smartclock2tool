@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import java.io.File;
 
+import pl.mateusz.clockadbprobe.bridge.BridgeExecutor;
+
 /**
  * Two-column UI: the buttons that are still used day to day on the left, a live
  * log on the right. The probe/report machinery behind GET ALL / SCAN / mic /
@@ -75,6 +77,11 @@ public class MainActivity extends Activity {
         if (exit != null) exit.setOnClickListener(v -> leave());
 
         wire(R.id.btnRootSsh, new Runnable() { public void run() { rootAll(); }});
+        wire(R.id.btnAutoRoot, new Runnable() { public void run() { autoRootAction(); }});
+        refreshAutoRootButton();
+        if (AutoRootPolicy.BLOCKED.equals(AutoRootOnBoot.state(getApplicationContext()))) {
+            logLine("AUTO ROOT blocked after an unsuccessful or interrupted attempt. Check STATUS before re-enabling.");
+        }
         wire(R.id.btnStatus, new Runnable() { public void run() { statusCheck(); }});
         wire(R.id.btnAdbWifi, new Runnable() { public void run() { adbWifiAction(null); }});
         wire(R.id.btnReport, new Runnable() { public void run() { fullReport(); }});
@@ -134,6 +141,12 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshAutoRootButton();
+    }
+
     /** Appends to the log pane and keeps it pinned to the newest line. */
     void logLine(final String text) {
         ui.post(new Runnable() { public void run() {
@@ -162,28 +175,90 @@ public class MainActivity extends Activity {
         running = true;
         status.setText("");
         logLine("== ROOT + SSH + ADB");
-        new Thread(new Runnable() { public void run() {
-            int rc = -1;
+        Thread starter = new Thread(new Runnable() { @Override public void run() {
             try {
-                rc = RootKit.run(getApplicationContext(), new RootKit.Log() {
-                    public void line(String text) { logLine(text); }
+                boolean started = AgentRuntime.startChain(getApplicationContext(), new RootKit.Log() {
+                    @Override public void line(String text) { logLine(text); }
+                }, new AgentRuntime.ChainListener() {
+                    @Override public void finished(int rc, boolean adbListening) {
+                        running = false;
+                        logLine(rc == 0 ? "bootstrap exit 0" : "bootstrap exit " + rc);
+                        for (String line : RootKit.stateLines(getApplicationContext())) logLine(line);
+                        refreshAdbButton();
+                        refreshAutoRootButton();
+                    }
                 });
-            } catch (Throwable t) {
-                Report.get().exception("MainActivity.rootAll", t);
-                logLine("FAILED: " + t);
-            } finally {
+                if (started) return;
                 running = false;
+                logLine("ROOT + ADB already running or blocked by another operation");
+            } catch (Throwable t) {
+                running = false;
+                Report.get().exception("MainActivity.rootAll.start", t);
+                logLine("FAILED: " + t);
             }
-            logLine(rc == 0 ? "bootstrap exit 0" : "bootstrap exit " + rc);
-            for (String line : RootKit.stateLines(getApplicationContext())) logLine(line);
-            refreshAdbButton();
-        }}, "rootkit").start();
+        }}, "rootkit-start");
+        try {
+            starter.start();
+        } catch (Throwable t) {
+            running = false;
+            Report.get().exception("MainActivity.rootAll.thread", t);
+            logLine("FAILED: " + t);
+        }
+    }
+
+    private void autoRootAction() {
+        String state = AutoRootOnBoot.state(getApplicationContext());
+        if (AutoRootPolicy.RUNNING.equals(state)) {
+            say("Automatic ROOT + ADB is running; wait for it to finish");
+            return;
+        }
+        if (AutoRootPolicy.READY.equals(state) || AutoRootPolicy.DONE.equals(state)) {
+            if (!AutoRootOnBoot.disable(getApplicationContext())) say("Could not save AUTO ROOT: OFF");
+            refreshAutoRootButton();
+            return;
+        }
+        if (!BridgeExecutor.firmwareSupported()) {
+            say("AUTO ROOT is unavailable on this firmware");
+            return;
+        }
+        String warning = AutoRootPolicy.BLOCKED.equals(state)
+                ? "The previous automatic run failed or was interrupted. Check STATUS before re-enabling. "
+                : "";
+        new AlertDialog.Builder(this)
+                .setTitle("Run ROOT + ADB after boot?")
+                .setMessage(warning + "This uses a kernel write that can panic and reboot the clock. "
+                        + "ADB will accept connections from any host on your LAN after each boot. "
+                        + "If an automatic run does not finish, the next boot will skip it until you enable it again. "
+                        + "The option is off by default.")
+                .setNegativeButton("CANCEL", null)
+                .setPositiveButton("ENABLE", (dialog, which) -> {
+                    if (AutoRootOnBoot.enable(getApplicationContext())) {
+                        say("AUTO ROOT enabled for the next boot");
+                    } else {
+                        say("Cannot enable AUTO ROOT: boot ID unavailable or setting could not be saved");
+                    }
+                    refreshAutoRootButton();
+                })
+                .show();
+    }
+
+    private void refreshAutoRootButton() {
+        final String state = AutoRootOnBoot.state(getApplicationContext());
+        ui.post(new Runnable() { @Override public void run() {
+            Button button = findViewById(R.id.btnAutoRoot);
+            if (button == null) return;
+            String label = AutoRootPolicy.BLOCKED.equals(state) ? "BLOCKED"
+                    : AutoRootPolicy.RUNNING.equals(state) ? "RUNNING"
+                    : AutoRootPolicy.OFF.equals(state) ? "OFF" : "ON";
+            button.setText("AUTO ROOT: " + label);
+        }});
     }
 
     /** Read-only check of what is up: root channel, SSH, ADB. */
     private void statusCheck() {
         new Thread(new Runnable() { public void run() {
             for (String line : RootKit.stateLines(getApplicationContext())) logLine(line);
+            refreshAutoRootButton();
         }}, "rootkit-status").start();
     }
 
@@ -204,18 +279,20 @@ public class MainActivity extends Activity {
                     : !RootKit.adbWifiOn(getApplicationContext());
             logLine("   state: turning " + (on ? "ON" : "OFF") + " (was "
                     + (on ? "OFF" : "ON") + ")");
-            try {
-                RootKit.runAdbWifi(getApplicationContext(), new RootKit.Log() {
-                    public void line(String text) { logLine(text); }
-                }, on);
-            } catch (Throwable t) {
-                Report.get().exception("MainActivity.adbWifi", t);
-                logLine("FAILED: " + t);
-            } finally {
+            boolean started = AgentRuntime.switchAdb(getApplicationContext(), on, new RootKit.Log() {
+                @Override public void line(String text) { logLine(text); }
+            }, new AgentRuntime.AdbListener() {
+                @Override public void finished(int rc, boolean listening) {
+                    running = false;
+                    logLine("ADB Wi-Fi exit " + rc + ", listening=" + listening);
+                    for (String line : RootKit.stateLines(getApplicationContext())) logLine(line);
+                    refreshAdbButton();
+                }
+            });
+            if (!started) {
                 running = false;
+                logLine("ADB Wi-Fi already running or blocked by another operation");
             }
-            for (String line : RootKit.stateLines(getApplicationContext())) logLine(line);
-            refreshAdbButton();
         }}, "adbwifi").start();
     }
 

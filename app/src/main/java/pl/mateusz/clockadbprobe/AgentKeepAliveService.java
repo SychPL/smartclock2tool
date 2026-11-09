@@ -11,6 +11,7 @@ import android.os.IBinder;
 
 /** Keeps the LAN agent resident while the stock clock remains in front. */
 public final class AgentKeepAliveService extends Service {
+    static final String ACTION_BOOT_ROOT = "pl.mateusz.clockadbprobe.action.BOOT_ROOT";
     // A new id ensures devices that briefly ran the old IMPORTANCE_MIN channel
     // receive the corrected foreground-service channel configuration.
     private static final String CHANNEL_ID = "clock_probe_agent_low_v2";
@@ -34,6 +35,16 @@ public final class AgentKeepAliveService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         AgentRuntime.ensureStarted(getApplicationContext());
+        if (intent != null && ACTION_BOOT_ROOT.equals(intent.getAction())) {
+            final android.content.Context application = getApplicationContext();
+            try {
+                new Thread(new Runnable() {
+                    @Override public void run() { AutoRootOnBoot.onBoot(application); }
+                }, "auto-root-boot").start();
+            } catch (Throwable t) {
+                Report.get().exception("AgentKeepAliveService.autoRoot", t);
+            }
+        }
         return START_STICKY;
     }
 

@@ -115,8 +115,19 @@ app's uid, and that is what lets `adb shell run-as ...` reach root from the PC.
    -> `modprobe_path` armed -> binfmt trigger fired -> channels up -> ADB over
    Wi-Fi on 5555. `STATUS` re-reads the state at any time and prints line by line
    what is actually up (`root:`, `adb:`, `ssh:`).
-3. This is also the only step you need after a power cycle - the chain is
-   idempotent, pressing it again just re-verifies.
+3. After a power cycle, press it again, or enable **AUTO ROOT** for an automatic
+   attempt after each boot. AUTO ROOT is off by default because the kernel write
+   can reboot the clock. It records the attempt before running; if the attempt
+   fails or a reboot interrupts it, the next boot skips it and the button shows
+   **BLOCKED**. Check STATUS and the log, then tap AUTO ROOT to re-enable it.
+   The button shows **ON** when ready and **RUNNING** during an attempt.
+   Turning AUTO ROOT off affects future boots; use **ADB WI-FI** to turn off
+   the current listener.
+
+To open a kiosk app after boot, make it the default home app in Android. An app
+using the Bridge can ask for this with `set_home` (see
+[Bridge API](docs/BRIDGE-API.md)). The home app can open before the automatic
+ROOT + ADB attempt finishes.
 
 ## From the PC
 
@@ -155,9 +166,10 @@ connect as `shell` - see the safety section in the README.
 
 ## After a power cycle
 
-Everything this tool does is runtime-only: a power cycle removes root, the
-property entry and the listeners, and the clock behaves like stock again. Press
-`ROOT + ADB` again (or run `tools/reroot.py` from the PC) and you are back.
+The root changes are runtime-only: a power cycle removes root, the property
+entry and the listeners. If AUTO ROOT is enabled, the app attempts to restore
+ROOT + ADB after boot. Otherwise press `ROOT + ADB` again (or run
+`tools/reroot.py` from the PC).
 
 ---
 

@@ -24,6 +24,7 @@ Two columns: buttons on the left, live log on the right (monospace, auto-scroll)
 | button | what it does |
 |---|---|
 | **ROOT + ADB** | unpacks the payloads and runs the whole chain (below). Idempotent - pressing it again just re-verifies. |
+| **AUTO ROOT** | OFF by default. Enable it to run ROOT + ADB once after each boot. A failed or interrupted automatic run changes the button to BLOCKED; tap it to re-enable only after checking the clock. |
 | **STATUS** | read-only check: prints `root:` (uid/context from the channel), `adb:` (ON/OFF, the property value, `ro.adb.secure`, whether 5555 listens), the `adb connect` line, and `ssh:` (whether 2223 listens, marked optional). |
 | **ADB WI-FI** | the toggle. Label shows the live state (`ADB WI-FI: ON` / `OFF`); pressing it flips it. |
 | **REPORT** | runs every probe module in sequence and opens the report screen. |
@@ -199,7 +200,7 @@ through the `REPORT` button; all are triggerable remotely.
   when armed, and offers global Back/Home to the overlay. Its `CONFIRM_TEXTS`
   list is deliberately multilingual because it matches the real dialog labels.
 * `OverlayService` - draggable nav bar for a clock with no buttons.
-* `BootReceiver` - restarts the keep-alive service after a reboot.
+* `BootReceiver` - restarts the keep-alive service after a reboot. If AUTO ROOT is enabled, the service also starts one ROOT + ADB attempt. It saves a safety marker before the kernel write and blocks later automatic attempts if this one did not finish.
 * Permissions: INTERNET, ACCESS_NETWORK_STATE, ACCESS_WIFI_STATE, RECORD_AUDIO,
   REQUEST_INSTALL_PACKAGES, SYSTEM_ALERT_WINDOW, FOREGROUND_SERVICE,
   RECEIVE_BOOT_COMPLETED, USE_FULL_SCREEN_INTENT. Everything stays on your LAN.
@@ -232,10 +233,10 @@ the agent), `filedrop_server.py` (serve `dist/` for self-update). See
 
 ## 12. Limits and safety
 
-* **Runtime-only.** Nothing is written to the bootloader, partitions or the vendor
-  image, and nothing survives a power cycle: root, the property entry, the
-  listeners and the SELinux change all go away. Press the button again after a
-  reboot.
+* **Runtime-only root.** Nothing is written to the bootloader, partitions or the vendor
+  image. Root, the property entry, listeners and the SELinux change go away after
+  a power cycle. The optional AUTO ROOT setting survives and can restore the
+  runtime state after boot; an interrupted attempt blocks further automatic runs.
 * **The write primitive can panic the kernel.** Keep a way to cut power; if a run
   stops making progress, power-cycle and start over.
 * **SELinux is set permissive** while the chain is up, and the helper points

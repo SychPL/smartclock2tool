@@ -152,7 +152,7 @@ app loads it and what its limits are.
 
 ## Safety and things you should know
 
-* **Everything is runtime-only.** A power cycle removes root, the property entry,
+* **Root changes are runtime-only.** A power cycle removes root, the property entry,
   the listeners and the SELinux change.
 * The write primitive can **panic the kernel**. Keep a way to cut power. If a run
   stops making progress, power-cycle and start again.
@@ -163,8 +163,10 @@ app loads it and what its limits are.
   `run-as`. Keep it **OFF** when you are not using it.
 * While the chain is up, SELinux is **permissive** and `modprobe_path` is
   pointed at the bundled helper (the helper restores it).
-* Nothing here touches the bootloader, partitions or the vendor image, and
-  nothing survives a reboot.
+* Nothing here touches the bootloader, partitions or the vendor image. The root
+  state disappears on reboot. The optional AUTO ROOT setting can restore it
+  after boot, but a failed or interrupted attempt blocks later automatic runs
+  until you re-enable the option in the app.
 
 ## Scope of this repository
 

@@ -12,6 +12,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * One-press root for the clock.
@@ -159,6 +161,36 @@ public final class RootKit {
         }
         p.waitFor();
         return sb.toString();
+    }
+
+    /** A bounded proof that the root channel answers after an automatic run. */
+    public static boolean rootChannelAlive(Context ctx) {
+        File bin = new File(dir(ctx), "clockroot");
+        if (!bin.isFile()) return false;
+        if (!bin.canExecute()) bin.setExecutable(true, true);
+        Process child = null;
+        try {
+            child = new ProcessBuilder(bin.getAbsolutePath(), "-c", "id")
+                    .redirectErrorStream(true).start();
+            final Process running = child;
+            FutureTask<Boolean> result = new FutureTask<>(() -> {
+                StringBuilder output = new StringBuilder();
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(running.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) output.append(line).append('\n');
+                }
+                return running.waitFor() == 0 && output.toString().contains("uid=0");
+            });
+            Thread reader = new Thread(result, "root-channel-check");
+            reader.setDaemon(true);
+            reader.start();
+            return result.get(2, TimeUnit.SECONDS);
+        } catch (Exception ignored) {
+            return false;
+        } finally {
+            if (child != null) child.destroy();
+        }
     }
 
     /**

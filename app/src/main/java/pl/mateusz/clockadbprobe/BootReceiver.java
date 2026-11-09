@@ -14,6 +14,7 @@ public final class BootReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         if (!"android.intent.action.BOOT_COMPLETED".equals(action)) return;
         Intent svc = new Intent(context, AgentKeepAliveService.class);
+        svc.setAction(AgentKeepAliveService.ACTION_BOOT_ROOT);
         if (Build.VERSION.SDK_INT >= 26) {
             context.startForegroundService(svc);
         } else {

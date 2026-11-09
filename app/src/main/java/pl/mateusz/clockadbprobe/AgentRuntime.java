@@ -34,6 +34,14 @@ final class AgentRuntime {
         int start(Context application, RootKit.Log log) throws Exception;
     }
 
+    interface ChainListener {
+        void finished(int exitCode, boolean adbListening);
+    }
+
+    interface AdbListener {
+        void finished(int exitCode, boolean adbListening);
+    }
+
     private static volatile ChainStarter chainStarter = new ChainStarter() {
         public int start(Context application, RootKit.Log log) throws Exception {
             return RootKit.run(application, log);
@@ -55,6 +63,11 @@ final class AgentRuntime {
 
     /** One chain at a time, whoever asks: the lock and the executor trace are taken together. */
     static boolean startChain(final Context application) {
+        return startChain(application, null, null);
+    }
+
+    static boolean startChain(final Context application, final RootKit.Log extraLog,
+                              final ChainListener listener) {
         ensureBridgeState(application);
         final String execId = Executions.execId("agent", "local", "rootssh");
         Executions.Grant grant = Executions.begin(execId, "running", ExecutorLock.PRIVILEGED);
@@ -62,26 +75,54 @@ final class AgentRuntime {
             Report.get().log("ROOTKIT", "refused: " + grant.reason);
             return false;
         }
-        new Thread(new Runnable() { public void run() {
+        Thread worker = new Thread(new Runnable() { public void run() {
+            int rc = -1;
+            boolean listening = false;
             try {
                 Executions.lock().promote(execId);
-                int rc = chainStarter.start(application, new RootKit.Log() {
+                rc = chainStarter.start(application, new RootKit.Log() {
                     public void line(String text) {
                         Report.get().log("ROOTKIT", text);
+                        if (extraLog != null) extraLog.line(text);
                     }
                 });
+                listening = AdbState.listening();
                 Report.get().log("ROOTKIT", "bootstrap exit " + rc + " | " + RootKit.sshHint());
             } catch (Throwable t) {
                 Report.get().exception("AgentRuntime.rootssh", t);
+                if (extraLog != null) extraLog.line("FAILED: " + t);
             } finally {
-                Executions.end(execId);
+                try {
+                    Executions.end(execId);
+                } catch (Throwable t) {
+                    Report.get().exception("AgentRuntime.rootssh.end", t);
+                }
+                if (listener != null) {
+                    try {
+                        listener.finished(rc, listening);
+                    } catch (Throwable t) {
+                        Report.get().exception("AgentRuntime.chainListener", t);
+                    }
+                }
             }
-        }}).start();
+        }}, "rootkit");
+        try {
+            worker.start();
+        } catch (Throwable t) {
+            Executions.end(execId);
+            Report.get().exception("AgentRuntime.rootssh.start", t);
+            return false;
+        }
         return true;
     }
 
     /** The ADB toggle without an Activity; until now it existed only behind the screen. */
     static boolean switchAdb(final Context application, final boolean on) {
+        return switchAdb(application, on, null, null);
+    }
+
+    static boolean switchAdb(final Context application, final boolean on,
+                             final RootKit.Log extraLog, final AdbListener listener) {
         ensureBridgeState(application);
         final String execId = Executions.execId("agent", "local", on ? "adbwifion" : "adbwifioff");
         Executions.Grant grant = Executions.begin(execId, "running", ExecutorLock.PRIVILEGED);
@@ -89,21 +130,43 @@ final class AgentRuntime {
             Report.get().log("ADBWIFI", "refused: " + grant.reason);
             return false;
         }
-        new Thread(new Runnable() { public void run() {
+        Thread worker = new Thread(new Runnable() { public void run() {
+            int rc = -1;
+            boolean listening = false;
             try {
-                RootKit.runAdbWifi(application, new RootKit.Log() {
+                rc = RootKit.runAdbWifi(application, new RootKit.Log() {
                     public void line(String text) {
                         Report.get().log("ADBWIFI", text);
+                        if (extraLog != null) extraLog.line(text);
                     }
                 }, on);
-                boolean listening = AdbState.listening();
+                listening = AdbState.listening();
                 Report.get().log("ADBWIFI", on ? AdbState.onResult("", listening) : AdbState.offResult("", listening));
             } catch (Throwable t) {
                 Report.get().exception("AgentRuntime.adbwifi", t);
+                if (extraLog != null) extraLog.line("FAILED: " + t);
             } finally {
-                Executions.end(execId);
+                try {
+                    Executions.end(execId);
+                } catch (Throwable t) {
+                    Report.get().exception("AgentRuntime.adbwifi.end", t);
+                }
+                if (listener != null) {
+                    try {
+                        listener.finished(rc, listening);
+                    } catch (Throwable t) {
+                        Report.get().exception("AgentRuntime.adbwifiListener", t);
+                    }
+                }
             }
-        }}).start();
+        }}, "adbwifi");
+        try {
+            worker.start();
+        } catch (Throwable t) {
+            Executions.end(execId);
+            Report.get().exception("AgentRuntime.adbwifi.start", t);
+            return false;
+        }
         return true;
     }
 
