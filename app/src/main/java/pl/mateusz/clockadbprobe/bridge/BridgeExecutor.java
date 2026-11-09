@@ -60,8 +60,23 @@ public final class BridgeExecutor {
         return lock == null ? ExecutorLock.UNKNOWN : lock.chain();
     }
 
+    /**
+     * {@code Build.DISPLAY} and {@code Build.ID} do not carry the calibration string on every retail unit: on the
+     * ROW build they come back as {@code "1.2.2_627_LenovoCD-24502F_ROW_2201050321"} and
+     * {@code "QP1A.190711.020"} respectively, neither of which equals {@link #SUPPORTED_FIRMWARE}. The build that
+     * string was taken from only ever appears whole inside {@code Build.FINGERPRINT}
+     * ({@code "LENOVO/Helios/Helios:10/QP1A.190711.020/LenovoCD-24502F_ROW_1.2.2.627_220105:user/release-keys"}),
+     * so that is checked too. All three fields are readable by any app without root, so this never depends on the
+     * root chain being up, before or after a reboot.
+     */
     public static boolean firmwareSupported() {
-        return SUPPORTED_FIRMWARE.equals(Build.DISPLAY) || SUPPORTED_FIRMWARE.equals(Build.ID);
+        return SUPPORTED_FIRMWARE.equals(Build.DISPLAY) || SUPPORTED_FIRMWARE.equals(Build.ID)
+                || Build.FINGERPRINT.contains(SUPPORTED_FIRMWARE);
+    }
+
+    /** What we actually saw, so a {@code wrong_firmware} answer can say why instead of leaving detail empty. */
+    public static String firmwareSeen() {
+        return Build.FINGERPRINT;
     }
 
     /**

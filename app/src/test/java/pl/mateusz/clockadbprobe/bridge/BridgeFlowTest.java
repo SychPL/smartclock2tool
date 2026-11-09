@@ -173,6 +173,23 @@ public class BridgeFlowTest {
     }
 
     @Test
+    public void aWrongFirmwareAnswerNamesTheBuildItSaw() {
+        BridgeFlow.Facts foreign = new BridgeFlow.Facts(false, ExecutorLock.IDLE, null,
+                "LENOVO/Other/Other:10/QP1A.190711.020/OtherBuild:user/release-keys");
+        BridgeFlow.Decision d = BridgeFlow.decide(request(Ops.ROOT_ADB_ON), helios(),
+                consented(Ops.ROOT_ADB_ON, ""), registry(), foreign);
+        assertEquals("wrong_firmware", d.status);
+        assertEquals("an empty detail left the caller unable to tell what was actually seen",
+                "LENOVO/Other/Other:10/QP1A.190711.020/OtherBuild:user/release-keys", d.detail);
+    }
+
+    @Test
+    public void aMissingFirmwareDetailDefaultsToEmptyNotNull() {
+        BridgeFlow.Facts foreign = new BridgeFlow.Facts(false, ExecutorLock.IDLE, null);
+        assertEquals("", foreign.firmwareDetail);
+    }
+
+    @Test
     public void aStoredResultWinsOverConditionsThatChangedLater() {
         OpRegistry reg = registry();
         OpRegistry.Key key = new OpRegistry.Key(HELIOS, "AA", ID);
